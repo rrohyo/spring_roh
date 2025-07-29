@@ -11,7 +11,7 @@ public class UserHomeController {
 	@RequestMapping("/user/home/main")
 	@ResponseBody
 	public String showMain() {
-		return "Hello World!";
+		return "Hello World! 안녕하세요";
 	}
 
 	

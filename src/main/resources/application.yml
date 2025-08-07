@@ -1,11 +1,15 @@
 server:
   port: 8080  
 spring:
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: "jdbc:mysql://localhost:3306/jdbc_db?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul"
     username: root
-    password: 1234
+    password: 
 mybatis: 
   type-aliases-package: com.example.demo.vo
   mapper-locations: classpath:mappers/**/*.xml

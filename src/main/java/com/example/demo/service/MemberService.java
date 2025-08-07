@@ -14,7 +14,7 @@ public class MemberService {
 	@Autowired
 	private MemberRepository memberRepository;
 
-	public ResultData doJoin(String loginId, String loginPw, String name, String nickname, String cellphoneNum, String email) {
+	public ResultData<Integer> doJoin(String loginId, String loginPw, String name, String nickname, String cellphoneNum, String email) {
 		
 		// 로그인 중복체크
 		Member existsMember = memberRepository.getMemberByLoginId(loginId);
@@ -31,11 +31,15 @@ public class MemberService {
 		
 		int id = memberRepository.getLastInsertId();
 
-		return ResultData.from("S-1", "회원가입 성공", id);
+		return ResultData.from("S-1", "회원가입 성공", id, "새 회원 id");
 	}
 
 	public Member getMemberById(int id) {
 		return memberRepository.getMemberById(id);
+	}
+	
+	public Member getMemberByLoginId(String loginId) {
+		return memberRepository.getMemberByLoginId(loginId);
 	}
 
 }

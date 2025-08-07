@@ -18,24 +18,14 @@ public class ArticleService {
 
 	public ArticleService(ArticleRepository articleRepository) {
 		this.articleRepository = articleRepository;
-//		makeTestData();
 	}
 
-	private void makeTestData() {
-		for (int i = 1; i <= 10; i++) {
-			String title = "제목 " + i;
-			String body = "내용 " + i;
-			articleRepository.writeArticle(title, body);
-
-		}
-	}
-
-	public ResultData writeArticle(String title, String body) {
-		articleRepository.writeArticle(title, body);
+	public ResultData writeArticle(int memberId, String title, String body) {
+		articleRepository.writeArticle(memberId, title, body);
 
 		int id = articleRepository.getLastInsertId();
 
-		return ResultData.from("S-1", Ut.f("%d번 글이 등록되었습니다.", id), id);
+		return ResultData.from("S-1", Ut.f("%d번 글이 등록되었습니다.", id), id, "등록된 게시글의 id");
 	}
 
 	public List<Article> getArticles() {
@@ -52,6 +42,15 @@ public class ArticleService {
 
 	public void deleteArticle(int id) {
 		articleRepository.deleteArticle(id);
+	}
+
+	public ResultData loginedMemberAuthCheck(int loginedMemberId, Article article) {
+
+		if (article.getMemberId() != loginedMemberId) {
+			return ResultData.from("F-A", Ut.f("%d번 게시글에 대한 권한 없음", article.getId()));
+		}
+
+		return ResultData.from("S-1", Ut.f("%d번 게시글을 수정함", article.getId()));
 	}
 
 }

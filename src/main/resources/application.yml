@@ -9,7 +9,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: "jdbc:mysql://localhost:3306/jdbc_db?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul"
     username: root
-    password: 
+    password: 1234
 mybatis: 
   type-aliases-package: com.example.demo.vo
   mapper-locations: classpath:mappers/**/*.xml

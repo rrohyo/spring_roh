@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,55 +15,60 @@ import com.example.demo.vo.Article;
 import com.example.demo.vo.ResultData;
 import com.example.demo.vo.Rq;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 @Controller
 public class UsrArticleController {
 
 	@Autowired
 	private ArticleService articleService;
+	@Autowired
+	private Rq rq;
 
 	UsrArticleController(ArticleService articleService) {
 		this.articleService = articleService;
 	}
 
+	@RequestMapping("/usr/article/modify")
+	public String modify(int id, Model model) throws IOException {
+		
+		Article article = articleService.getForPrintArticle(rq.getLoginedMemberId(), id);
+		if(article == null) {
+			rq.printHistoryBack(Ut.f("%d번 글은 없습니다.", id));
+			return null;
+		}
+
+		model.addAttribute("article", article);
+
+		return "/usr/article/modify";
+	}
+
 	@RequestMapping("/usr/article/doModify")
 	@ResponseBody
-	public ResultData doModify(HttpServletRequest req, int id, String title, String body) {
-
-		// 로그인체크
-		Rq rq = (Rq) req.getAttribute("rq");
-		if (rq.isLogined() == false) {
-			return ResultData.from("F-A", "로그인 하고 오세요.");
-		}
+	public String doModify(int id, String title, String body) {
 
 		// 게시글 유무체크
 		Article article = articleService.getArticleById(id);
 		if (article == null) {
-			return ResultData.from("F-1", Ut.f("%d번 글은 없습니다.", id));
+			return Ut.jsHistoryBack("F-1", Ut.f("%d번 글은 없습니다.", id));
 		}
 
 		// 권한체크
 		ResultData userCanModifyRd = articleService.userCanModify(rq.getLoginedMemberId(), article);
 		if (userCanModifyRd.getResultCode().startsWith("F")) {
-			return ResultData.from("F-A", userCanModifyRd.getMsg());
+			return Ut.jsHistoryBack("F-A", userCanModifyRd.getMsg());
 		}
 
 		articleService.modifyArticle(id, title, body);
 
 		article = articleService.getArticleById(id);
 
-		return ResultData.from(userCanModifyRd.getResultCode(), userCanModifyRd.getMsg(), article, "수정한 글");
+		return Ut.jsReplace(userCanModifyRd.getResultCode(), userCanModifyRd.getMsg(), "../article/detail?id=" + id);
 	}
 
 	@RequestMapping("/usr/article/doDelete")
 	@ResponseBody
-	public String doDelete(HttpServletRequest req, int id) {
-		// 로그인체크
-		Rq rq = (Rq) req.getAttribute("rq");
-		if (rq.isLogined() == false) {
-			return Ut.jsReplace("F-A", "로그인 하고 오세요", "../member/login");
-		}
+	public String doDelete(int id) {
+
+//		Rq rq = (Rq) req.getAttribute("rq");
 
 		// 게시글 유무체크
 		Article article = articleService.getArticleById(id);
@@ -84,21 +90,23 @@ public class UsrArticleController {
 		return Ut.jsReplace(userCanDeleteRd.getResultCode(), userCanDeleteRd.getMsg(), "../article/list");
 	}
 
+	@RequestMapping("/usr/article/write")
+	public String showWrite() {
+		
+		return "/usr/article/write";
+	}
+	
 	@RequestMapping("/usr/article/doWrite")
 	@ResponseBody
-	public ResultData<Article> doWrite(HttpServletRequest req, String title, String body) {
+	public String doWrite(String title, String body) {
 
-		// 로그인체크
-		Rq rq = (Rq) req.getAttribute("rq");
-		if (rq.isLogined() == false) {
-			return ResultData.from("F-A", "로그인 하고 작성하세요.");
-		}
+//		Rq rq = (Rq) req.getAttribute("rq");
 
 		if (Ut.isEmptyOrNull(title)) {
-			return ResultData.from("F-1", "제목을 입력하세요");
+			return Ut.jsHistoryBack("F-1", "제목을 입력하세요");
 		}
 		if (Ut.isEmptyOrNull(body)) {
-			return ResultData.from("F-2", "내용을 입력하세요");
+			return Ut.jsHistoryBack("F-2", "내용을 입력하세요");
 		}
 
 		ResultData writeArticleRd = articleService.writeArticle(rq.getLoginedMemberId(), title, body);
@@ -107,13 +115,13 @@ public class UsrArticleController {
 
 		Article article = articleService.getArticleById(id);
 
-		return ResultData.newData(writeArticleRd, article, "새로 작성된 글");
+		return Ut.jsReplace(writeArticleRd.getResultCode(), writeArticleRd.getMsg(), "../article/detail?id=" + id);
 	}
 
 	@RequestMapping("/usr/article/detail")
-	public String getArticle(HttpServletRequest req, int id, Model model) {
+	public String getArticle(int id, Model model) {
 
-		Rq rq = (Rq) req.getAttribute("rq");
+//		Rq rq = (Rq) req.getAttribute("rq");
 
 		Article article = articleService.getForPrintArticle(rq.getLoginedMemberId(), id);
 

@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class BeforeActionInterceptor implements HandlerInterceptor {
+public class NeedLoginInterceptor implements HandlerInterceptor {
 
 	@Autowired
 	private Rq rq;
@@ -19,12 +19,16 @@ public class BeforeActionInterceptor implements HandlerInterceptor {
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
-//		System.out.println("인터셉터 실행 부분");
+		System.err.println("로그인 체크 인터셉터");
 
-//		Rq rq = new Rq(request, response);
-		request.setAttribute("rq", rq);
-		
-		rq.initBeforeActionInterceptor();
+		// 로그인체크
+//		Rq rq = (Rq) request.getAttribute("rq");
+		if (rq.isLogined() == false) { // 로그인 안된 상태
+
+			rq.printHistoryBack("로그인 하고 이용하세요(loginInterceptor)");
+
+			return false;
+		}
 
 		return HandlerInterceptor.super.preHandle(request, response, handler);
 	}

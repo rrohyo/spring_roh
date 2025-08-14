@@ -138,4 +138,5 @@ public class UsrArticleController {
 
 		return "usr/article/list";
 	}
+
 }

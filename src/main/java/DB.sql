@@ -1,6 +1,6 @@
-DROP DATABASE `spring_2025_08`;
-CREATE DATABASE `spring_2025_08`;
-USE `spring_2025_08`;
+DROP DATABASE `jdbc_db`;
+CREATE DATABASE `jdbc_db`;
+USE `jdbc_db`;
 
 # 게시글 테이블 생성
 CREATE TABLE `article` (

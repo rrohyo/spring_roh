@@ -2,6 +2,7 @@ DROP DATABASE `jdbc_db`;
 CREATE DATABASE `jdbc_db`;
 USE `jdbc_db`;
 
+
 # 게시글 테이블 생성
 CREATE TABLE `article` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,

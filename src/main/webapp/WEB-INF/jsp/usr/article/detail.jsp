@@ -5,30 +5,28 @@
 <%@ include file="../common/head.jspf"%>
 
 <script>
-let $id = parseInt('${param.id}');
-console.log('$id : ' + $id);
+	let $id = parseInt('${param.id}');
+	console.log('$id : ' + $id);
 </script>
 
 <script>
-function ArticleDetail__doIncreaseHitCount(){
-	
-	$.get('../article/hitCount', {
-		id : $id,
-		ajaxMode : 'Y'
-	}, function(data){
-		console.log('data : ' + data);
-		console.log('data.data1 : ' + data.data1);
-		console.log('data.msg : ' + data.msg);
-		$('.article-detail__hit-count').html(data.data1);
-	}, 'json');
-}
+	function ArticleDetail__doIncreaseHitCount() {
 
-$(function(){
-<!-- 	ArticleDetail__doIncreaseHitCount(); -->
-	setTimeout(ArticleDetail__doIncreaseHitCount, 2000);
-})
+		$.get('../article/hitCount', {
+			id : $id,
+			ajaxMode : 'Y'
+		}, function(data) {
+			console.log('data : ' + data);
+			console.log('data.data1 : ' + data.data1);
+			console.log('data.msg : ' + data.msg);
+			$('.article-detail__hit-count').html(data.data1);
+		}, 'json');
+	}
 
-
+	$(function() {
+		<!-- ArticleDetail__doIncreaseHitCount(); -->
+		setTimeout(ArticleDetail__doIncreaseHitCount, 2000);
+	})
 </script>
 
 
@@ -75,6 +73,25 @@ $(function(){
 					<span class="article-detail__hit-count">${article.hitCount }</span>
 				</td>
 			</tr>
+			<tr>
+				<th>LIKE</th>
+				<td>
+					${article.extra__goodReactionPoint }
+				</td>
+			</tr>
+			<tr>
+				<th>DISLIKE</th>
+				<td>
+					${article.extra__badReactionPoint }
+				</td>
+			</tr>
+			<tr>
+				<th>SUM</th>
+				<td>
+					${article.extra__sumReactionPoint }
+				</td>
+			</tr>
+			
 		</tbody>
 	</table>
 

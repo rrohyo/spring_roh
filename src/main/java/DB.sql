@@ -3,6 +3,7 @@ CREATE DATABASE `jdbc_db`;
 USE `jdbc_db`;
 
 
+
 # 게시글 테이블 생성
 CREATE TABLE `article` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
@@ -148,6 +149,8 @@ SELECT *
 FROM `member`;
 SELECT *
 FROM `board`;
+SELECT *
+FROM `reactionPoint`;
 
 
 
@@ -201,24 +204,80 @@ SET `regDate` = NOW(),
     relId = 1,
     `point` = 1;
 
+
+ALTER TABLE `article` ADD COLUMN `goodReactionPoint` INT UNSIGNED NOT NULL DEFAULT 0;
+ALTER TABLE `article` ADD COLUMN `badReactionPoint` INT UNSIGNED NOT NULL DEFAULT 0;
+
+SELECT *
+FROM `article` a
+INNER JOIN `reactionPoint` rp
+ON a.id = rp.relId;
+
+UPDATE `article` AS a
+INNER JOIN (
+    SELECT rp.relTypeCode, rp.relId, 
+    SUM(IF(rp.point > 0, rp.point, 0)) AS goodReactionPoint,
+    SUM(IF(rp.point < 0, rp.point * -1, 0)) AS badReactionPoint
+    FROM `reactionPoint` rp
+    GROUP BY rp.relTypeCode, rp.relId
+) AS rp_sum
+ON a.id = rp_sum.relId
+SET a.goodReactionPoint = rp_sum.goodReactionPoint,
+    a.badReactionPoint = rp_sum.badReactionPoint;
+
+
+
+SELECT *
+FROM `article`;
 SELECT *
 FROM `reactionPoint`;
 
 
 SELECT a.*, m.nickname
-		FROM `article` a
-		INNER JOIN `member` m
-		ON a.memberId = m.id
-		WHERE a.`id` = 1;
+FROM `article` a
+INNER JOIN `member` m
+ON a.memberId = m.id
+WHERE a.`id` = 1;
 
 
 SELECT a.*, m.nickname AS extra__writer
-		FROM `article` a
-		INNER JOIN `member` m
-		ON a.memberId = m.id
-		INNER JOIN `board` b
-		ON a.boardId = b.id
-		ORDER BY a.id DESC;
+FROM `article` a
+INNER JOIN `MEMBER` m
+ON a.memberId = m.id
+INNER JOIN `board` b
+ON a.boardId = b.id
+ORDER BY a.id DESC;
+
+select *
+from `article` a
+inner join `MEMBER` m
+on a.memberId = m.id
+left join `reactionPoint` rp
+on a.id = rp.relId and rp.relTypeCode = 'article';
+
+# 서브쿼리
+select a.*, ifnull(sum(rp.point), 0) as 'extra__sumReactionPoint', 
+ifnull(sum(if(rp.point > 0, rp.point, 0)), 0) as 'extra__goodReactionPoint',
+ifnull(sum(if(rp.point < 0, rp.point, 0)),0) as 'extra__badReactionPoint'
+from (SELECT a.*, m.nickname AS extra__writer
+    FROM `article` a
+    INNER JOIN `MEMBER` m
+    ON a.memberId = m.id) as a
+left join `reactionPoint` as rp
+ON a.id = rp.relId AND rp.relTypeCode = 'article'
+group by a.id;
+
+
+# join
+SELECT a.*, IFNULL(SUM(rp.point), 0) AS 'extra__sumReactionPoint', 
+IFNULL(SUM(IF(rp.point > 0, rp.point, 0)), 0) AS 'extra__goodReactionPoint',
+IFNULL(SUM(IF(rp.point < 0, rp.point, 0)),0) AS 'extra__badReactionPoint'
+FROM  `article` a
+INNER JOIN `member` m
+ON a.memberId = m.id
+LEFT JOIN `reactionPoint` AS rp
+ON a.id = rp.relId AND rp.relTypeCode = 'article'
+WHERE a.id = 1;
 
 
 
@@ -228,17 +287,17 @@ WHERE `title` LIKE CONCAT('%', 777, '%');
 
 ###############################################
 # 게시글 데이터 대량 생성1
-insert into `article` (`regDate`, `updateDate`, `memberId`, `boardId`, `title`, `body`) 
-select now(), now(), floor(rand() * 2) + 2, floor(rand() * 3) + 1, concat('제목__', rand()), concat('내용__', rand())
-from `article`;
+INSERT INTO `article` (`regDate`, `updateDate`, `memberId`, `boardId`, `title`, `body`) 
+SELECT NOW(), NOW(), FLOOR(RAND() * 2) + 2, FLOOR(RAND() * 3) + 1, CONCAT('제목__', RAND()), CONCAT('내용__', RAND())
+FROM `article`;
 
-select * from `article`;
+SELECT * FROM `article`;
 
 # 게시글 데이터 대량 생성2
 INSERT INTO `article`
 SET `regDate` = NOW(),
     `updateDate` = NOW(),
-    `memberId` = ceiling(rand() * 3),
+    `memberId` = CEILING(RAND() * 3),
     `boardId` = CEILING(RAND() * 3),
     `title` = CONCAT('제목', SUBSTRING(RAND() * 1000 FROM 1 FOR 2)),
     `body` = CONCAT('내용', SUBSTRING(RAND() * 1000 FROM 1 FOR 2));
@@ -254,5 +313,4 @@ SET `regDate` = NOW(),
     `loginId` = CONCAT('id', SUBSTRING(RAND() * 1000 FROM 1 FOR 3)),
     `loginPw` = CONCAT('pw', SUBSTRING(RAND() * 1000 FROM 1 FOR 3)),
     `name` = CONCAT('이름', SUBSTRING(RAND() * 1000 FROM 1 FOR 2));
-    
     
